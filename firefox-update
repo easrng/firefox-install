@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+if [ ! -w "/opt" ] ; then pkexec "$0"; exit $? ; fi
+OG_DIR="$(pwd)"
+trap 'rm -rf "$TMP_DIR"; cd "$OG_DIR"' EXIT
+TMP_DIR="$(mktemp -d)"
+chmod 700 "$TMP_DIR"
+cd "$TMP_DIR"
+curl -L "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" | tar jxvf -
+if [ -d /opt/firefox.old ]; then
+  rm -rf /opt/firefox.old
+fi
+mv /opt/firefox /opt/firefox.old
+mv ./firefox /opt/firefox
+echo "Update complete!"
+exit 0
