@@ -1,16 +1,39 @@
 #!/bin/sh
 set -eu
-if [ ! -w "/opt" ] ; then pkexec "$0"; exit $? ; fi
 OG_DIR="$(pwd)"
-trap 'rm -rf "$TMP_DIR"; cd "$OG_DIR"' EXIT
 TMP_DIR="$(mktemp -d)"
+trap '{ [ -d ~/.local/opt/firefox.old ] && echo "failed, restoring firefox.old" && mv ~/.local/opt/firefox.old ~/.local/opt/firefox; }; cd "$OG_DIR"' EXIT
 chmod 700 "$TMP_DIR"
 cd "$TMP_DIR"
-curl -L "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" | tar jxvf -
-if [ -d /opt/firefox.old ]; then
-  rm -rf /opt/firefox.old
+wget -O - "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" | tar jxf -
+mkdir -p ~/.local/opt/
+if [ -d ~/.local/opt/firefox.old ]; then
+  rm -rf ~/.local/opt/firefox.old
 fi
-mv /opt/firefox /opt/firefox.old
-mv ./firefox /opt/firefox
-echo "Update complete!"
+if [ -d ~/.local/opt/firefox ]; then
+  mv ~/.local/opt/firefox ~/.local/opt/firefox.old
+fi
+mv ./firefox ~/.local/opt/
+rm ~/.local/bin/firefox
+ln -s ~/.local/opt/firefox/firefox ~/.local/bin/firefox
+mkdir -p ~/.local/share/applications/
+cat <<_END >~/.local/share/applications/firefox.desktop
+[Desktop Entry]
+Version=1.0
+Name=Firefox Web Browser
+Comment=Browse the World Wide Web
+GenericName=Web Browser
+Keywords=Internet;WWW;Browser;Web;Explorer
+Exec=firefox %u
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=$HOME/.local/opt/firefox/browser/chrome/icons/default/default128.png
+Categories=GNOME;GTK;Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
+StartupNotify=true
+_END
+update-desktop-database ~/.local/share/applications
+[ -d ~/.local/opt/firefox ] && [ -d ~/.local/opt/firefox.old ] && rm -rf ~/.local/opt/firefox.old;
+echo "firefox installed!"
 exit 0
