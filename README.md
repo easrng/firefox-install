@@ -1,2 +1,2 @@
-# firefox-update
-Updates firefox using the Mozilla.org builds
+# firefox-install
+installs Firefox from mozilla.org to ~/.local/opt and registers the .desktop file
