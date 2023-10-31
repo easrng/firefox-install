@@ -2,7 +2,7 @@
 set -eu
 OG_DIR="$(pwd)"
 TMP_DIR="$(mktemp -d)"
-trap '{ [ -d ~/.local/opt/firefox.old ] && echo "failed, restoring firefox.old" && mv ~/.local/opt/firefox.old ~/.local/opt/firefox; }; cd "$OG_DIR"' EXIT
+trap 'rm -rf "$TMP_DIR"; { [ -d ~/.local/opt/firefox.old ] && echo "failed, restoring firefox.old" && mv ~/.local/opt/firefox.old ~/.local/opt/firefox; }; cd "$OG_DIR"' EXIT
 chmod 700 "$TMP_DIR"
 cd "$TMP_DIR"
 wget -O - "https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" | tar jxf -
